@@ -1,0 +1,19 @@
+# docker-compose.yml — Serve landing page di port 8080
+version: "3.8"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ai-local-services:latest
+    container_name: ai-local-services
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    networks:
+      - frontend
+
+networks:
+  frontend:
+    driver: bridge
