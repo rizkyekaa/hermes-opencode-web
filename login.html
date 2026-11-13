@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#08111f">
+  <title>Masuk · Hermes Build Lab</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .login-page{width:min(1120px,calc(100% - 36px));margin:0 auto;display:grid;place-items:center;padding:64px 24px;min-height:calc(100vh - 140px)}
+    .login-card{background:linear-gradient(180deg,#101d30 0%,#0c172a 100%);border:1px solid var(--line);border-radius:18px;padding:36px;box-shadow:var(--shadow)}
+    .login-card .brand{display:flex;align-items:center;gap:11px;color:var(--ink);text-decoration:none;font-weight:800;margin-bottom:24px}
+    .login-card .brand .brand-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--cyan),var(--blue));color:#07111e}
+    .login-card h1{margin:0 0 6px;font-size:clamp(1.5rem,3vw,2rem);letter-spacing:-.02em}
+    .login-card .subtitle{color:var(--muted);font-size:.95rem;margin:0 0 24px;max-width:420px}
+    .field{margin-bottom:16px}
+    .field label{display:block;font-size:.82rem;font-weight:700;color:var(--muted);margin-bottom:7px}
+    .field input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;outline:none;transition:border-color .18s, box-shadow .18s}
+    .field input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(94,234,212,.16)}
+    .field .help{color:var(--muted);font-size:.78rem;margin-top:6px}
+    .actions{display:flex;flex-direction:column;gap:12px;align-items:stretch}
+    .primary-button{padding:13px;font-weight:800}
+    .secondary-button{padding:13px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--ink);font-weight:700}
+    .footer-links{display:flex;justify-content:space-between;align-items:center;margin-top:20px;font-size:.86rem;color:var(--muted)}
+    .footer-links a{color:var(--cyan);text-decoration:none}
+    .muted{color:var(--muted)}
+    .error{color:#ffb3b3;font-size:.82rem;margin-top:12px;display:none}
+  </style>
+</head>
+<body>
+  <main class="login-page">
+    <form class="login-card" id="loginForm" novalidate>
+      <a class="brand" href="#top"><span class="brand-mark">H</span><span>Hermes Build Lab</span></a>
+      <h1>Masuk</h1>
+      <p class="subtitle">Gunakan akun untuk mengakses panel build.</p>
+
+      <div class="field">
+        <label for="email">Alamat email</label>
+        <input id="email" name="email" type="email" autocomplete="email" placeholder="nama@contoh.com" required>
+      </div>
+
+      <div class="field">
+        <label for="password">Kata sandi</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required minlength="6">
+        <button type="button" class="ghost-button" data-toggle="showPassword" style="margin-top:8px">Tampilkan</button>
+      </div>
+
+      <div class="actions">
+        <button class="primary-button" type="submit">Masuk</button>
+        <button class="secondary-button" type="button"> Registrasi</button>
+      </div>
+
+      <div class="footer-links">
+        <span>Lupa kata sandi?</span>
+        <a href="#">Reset</a>
+      </div>
+
+      <p class="error" id="error"><%= errorMessage %></p>
+    </form>
+  </main>
+  <script src="app.js"></script>
+  <script>
+    const form = document.getElementById("loginForm");
+    const error = document.getElementById("error");
+    const passwordInput = document.getElementById("password");
+    const toggleBtn = document.querySelector('[data-toggle="showPassword"]');
+
+    toggleBtn.addEventListener("click", () => {
+      const type = passwordInput.type === "password" ? "text" : "password";
+      passwordInput.type = type;
+      toggleBtn.textContent = type === "password" ? "Tampilkan" : "Sembunyi";
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      error.style.display = "none";
+      const payload = new FormData(form);
+      try {
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: payload.get("email"), password: payload.get("password") })
+        });
+        if (res.ok) {
+          window.location.href = "/dashboard";
+        } else {
+          const data = await res.json().catch(() => ({}));
+          error.textContent = data.message || "Email atau kata sandi salah.";
+          error.style.display = "block";
+        }
+      } catch {
+        error.textContent = "Tidak bisa terhubung ke server. Coba lagi.";
+        error.style.display = "block";
+      }
+    });
+  </script>
+</body>
+</html>
